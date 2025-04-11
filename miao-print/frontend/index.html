@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>蓝牙打印机控制</title>
+    <style>
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; }
+        .status { padding: 10px; margin-bottom: 20px; border: 1px solid #ddd; }
+        input[type="text"], textarea { width: 100%; margin: 5px 0; }
+        button { padding: 8px 15px; background: #007bff; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status" id="status">
+    状态：未连接
+    <div id="details" style="display: none;">
+        电量：<span id="battery"></span><br>
+        打印密度：<span id="density"></span><br>
+        自动关机时间：<span id="poweroff"></span>
+    </div>
+</div>
+        
+        <input type="text" id="mac" placeholder="输入蓝牙MAC地址 (例如: 11:22:33:44:55:66)">
+        <button onclick="connectPrinter()">连接打印机</button>
+        <button onclick="checkStatus()">刷新状态</button>
+
+        <hr>
+        <textarea id="text" placeholder="输入要打印的文字"></textarea>
+        <input type="file" id="image" accept="image/*">
+        <button onclick="submitPrint()">提交打印</button>
+    </div>
+
+    <script>
+async function checkStatus() {
+    const res = await fetch('/api/printer/status');
+    const data = await res.json();
+    const statusDiv = document.getElementById('status');
+    const detailsDiv = document.getElementById('details');
+    
+    if (data.connected) {
+        statusDiv.innerHTML = `状态：已连接 (${data.mac})`;
+        detailsDiv.style.display = 'block';
+        document.getElementById('battery').textContent = data.battery;
+        document.getElementById('density').textContent = data.density;
+        document.getElementById('poweroff').textContent = data.power_off_time;
+    } else {
+        statusDiv.innerHTML = '状态：未连接';
+        detailsDiv.style.display = 'none';
+    }
+}
+
+        async function connectPrinter() {
+            const mac = document.getElementById('mac').value;
+            const res = await fetch('/api/printer/connect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mac })
+            });
+            const data = await res.json();
+            alert(data.message);
+            checkStatus();
+        }
+
+        async function submitPrint() {
+            const formData = new FormData();
+            const text = document.getElementById('text').value;
+            const file = document.getElementById('image').files[0];
+
+            if (text) formData.append('text', text);
+            if (file) formData.append('image', file);
+
+            const res = await fetch('/api/print', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await res.json();
+            alert(result.message);
+        }
+
+        // 初始状态检查
+        checkStatus();
+    </script>
+</body>
+</html>
