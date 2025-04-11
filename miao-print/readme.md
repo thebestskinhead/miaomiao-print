@@ -1,4 +1,4 @@
-### 驱动作者：ihciah
+### 先驱者、驱动作者：ihciah
 https://github.com/ihciah/miaomiaoji-tool
 
 ### 环境
