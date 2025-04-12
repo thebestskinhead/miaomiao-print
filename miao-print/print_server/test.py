@@ -13,7 +13,6 @@ import re
 import threading
 from functools import wraps
 
-# 假设这些自定义模块已适配Python 2
 from message_process import BtManager
 from image_process import ImageConverter, TextConverter
 
@@ -21,11 +20,9 @@ app = Flask(__name__)
 CORS(app)
 logging.basicConfig(level=logging.INFO)
 
-# 线程安全全局变量
 bt_lock = threading.Lock()
 mmj = None
 
-# MAC地址验证正则
 MAC_REGEX = re.compile(r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$')
 
 def check_connection(f):
